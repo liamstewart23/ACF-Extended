@@ -1,14 +1,15 @@
 <?php
 
-if(!defined('ABSPATH'))
+if (!defined('ABSPATH')) {
     exit;
+}
 
 /**
  * Register Dynamic Taxonomy
  */
 add_action('init', 'acfe_dt_register');
-function acfe_dt_register(){
-
+function acfe_dt_register()
+{
     register_post_type('acfe-dt', array(
         'label'                 => 'Taxonomies',
         'description'           => 'Taxonomies',
@@ -44,20 +45,20 @@ function acfe_dt_register(){
             'read_post'             => acf_get_setting('capability'),
         )
     ));
-
 }
 
 /**
  * WP Register Taxonomies
  */
 add_action('init', 'acfe_dt_registers');
-function acfe_dt_registers(){
-
+function acfe_dt_registers()
+{
     $dynamic_taxonomies = get_option('acfe_dynamic_taxonomies', array());
-    if(empty($dynamic_taxonomies))
+    if (empty($dynamic_taxonomies)) {
         return;
+    }
 
-    foreach($dynamic_taxonomies as $name => $register_args){
+    foreach ($dynamic_taxonomies as $name => $register_args) {
 
         // Extract 'post_types' from 'register_args'
         $post_types = acf_extract_var($register_args, 'post_types', array());
@@ -67,41 +68,39 @@ function acfe_dt_registers(){
 
         // Filter Admin: Posts Per Page
         add_filter('edit_' . $name . '_per_page', 'acfe_dt_filter_admin_ppp');
-
     }
-
 }
 
 /**
  * ACF Exclude Dynamic Taxonomy from available post types
  */
 add_filter('acf/get_post_types', 'acfe_dt_exclude', 10, 2);
-function acfe_dt_exclude($post_types, $args){
-
-    if(empty($post_types))
+function acfe_dt_exclude($post_types, $args)
+{
+    if (empty($post_types)) {
         return $post_types;
+    }
 
-    foreach($post_types as $k => $post_type){
-
-        if($post_type != 'acfe-dt')
+    foreach ($post_types as $k => $post_type) {
+        if ($post_type != 'acfe-dt') {
             continue;
+        }
 
         unset($post_types[$k]);
-
     }
 
     return $post_types;
-
 }
 
 /**
  * Dynamic Taxonomy Save
  */
 add_action('acf/save_post', 'acfe_dt_filter_save', 20);
-function acfe_dt_filter_save($post_id){
-
-    if(get_post_type($post_id) != 'acfe-dt')
+function acfe_dt_filter_save($post_id)
+{
+    if (get_post_type($post_id) != 'acfe-dt') {
         return;
+    }
 
     $title = get_field('label', $post_id);
     $name = get_field('acfe_dt_name', $post_id);
@@ -126,9 +125,10 @@ function acfe_dt_filter_save($post_id){
     // Labels
     $labels = get_field('labels', $post_id);
     $labels_args = array();
-    foreach($labels as $k => $l){
-        if(empty($l))
+    foreach ($labels as $k => $l) {
+        if (empty($l)) {
             continue;
+        }
 
         $labels_args[$k] = $l;
     }
@@ -206,7 +206,7 @@ function acfe_dt_filter_save($post_id){
     );
 
     // Rewrite: override
-    if($rewrite && $rewrite_args_select){
+    if ($rewrite && $rewrite_args_select) {
         $register_args['rewrite'] = array(
             'slug'          => $rewrite_args['acfe_dt_rewrite_slug'],
             'with_front'    => $rewrite_args['acfe_dt_rewrite_with_front'],
@@ -231,17 +231,17 @@ function acfe_dt_filter_save($post_id){
 
     // Flush permalinks
     flush_rewrite_rules();
-
 }
 
 /**
  * Dynamic Taxonomy Status Publish > Trash
  */
 add_action('publish_to_trash', 'acfe_dt_filter_status_trash');
-function acfe_dt_filter_status_trash($post){
-
-    if(get_post_type($post->ID) != 'acfe-dt')
+function acfe_dt_filter_status_trash($post)
+{
+    if (get_post_type($post->ID) != 'acfe-dt') {
         return;
+    }
 
     $post_id = $post->ID;
     $name = get_field('acfe_dt_name', $post_id);
@@ -250,84 +250,90 @@ function acfe_dt_filter_status_trash($post){
     $option = get_option('acfe_dynamic_taxonomies', array());
 
     // Check ACFE option
-    if(isset($option[$name]))
+    if (isset($option[$name])) {
         unset($option[$name]);
+    }
 
     // Update ACFE option
     update_option('acfe_dynamic_taxonomies', $option);
 
     // Flush permalinks
     flush_rewrite_rules();
-
 }
 
 /**
  * Dynamic Taxonomy Status Trash > Publish
  */
 add_action('trash_to_publish', 'acfe_dt_filter_status_publish');
-function acfe_dt_filter_status_publish($post){
-
-    if(get_post_type($post->ID) != 'acfe-dt')
+function acfe_dt_filter_status_publish($post)
+{
+    if (get_post_type($post->ID) != 'acfe-dt') {
         return;
+    }
 
     acfe_dt_filter_save($post->ID);
-
 }
 
 /**
  * Dynamic Taxonomy Admin: List
  */
 add_action('pre_get_posts', 'acfe_dt_admin_pre_get_posts');
-function acfe_dt_admin_pre_get_posts($query){
-
-    if(!is_admin() || !$query->is_main_query())
+function acfe_dt_admin_pre_get_posts($query)
+{
+    if (!is_admin() || !$query->is_main_query()) {
         return;
+    }
 
     global $pagenow;
-    if($pagenow != 'edit.php')
+    if ($pagenow != 'edit.php') {
         return;
+    }
 
     $post_type = $query->get('post_type');
-    if($post_type != 'acfe-dt')
+    if ($post_type != 'acfe-dt') {
         return;
+    }
 
     $query->set('orderby', 'name');
     $query->set('order', 'ASC');
-
 }
 
 /**
  * Dynamic Taxonomy Admin: Posts Per Page
  */
 add_filter('edit_posts_per_page', 'acfe_dt_admin_ppp', 10, 2);
-function acfe_dt_admin_ppp($ppp, $post_type){
-
-    if($post_type != 'acfe-dt')
+function acfe_dt_admin_ppp($ppp, $post_type)
+{
+    if ($post_type != 'acfe-dt') {
         return $ppp;
+    }
 
     global $pagenow;
-    if($pagenow != 'edit.php')
+    if ($pagenow != 'edit.php') {
         return $ppp;
+    }
 
     return 999;
-
 }
 
 /**
  * Filter Admin: List
  */
 add_filter('get_terms_args', 'acfe_dt_filter_admin_list', 10, 2);
-function acfe_dt_filter_admin_list($args, $taxonomies){
-
-    if(!is_admin())
+function acfe_dt_filter_admin_list($args, $taxonomies)
+{
+    if (!is_admin()) {
         return $args;
+    }
 
     global $pagenow;
-    if($pagenow != 'edit-tags.php')
+    if ($pagenow != 'edit-tags.php') {
         return $args;
+    }
 
-    if(empty($taxonomies))
+    if (empty($taxonomies)) {
         return $args;
+    }
 
     $taxonomy = array_shift($taxonomies);
     $taxonomy_obj = get_taxonomy($taxonomy);
@@ -335,49 +341,54 @@ function acfe_dt_filter_admin_list($args, $taxonomies){
     $acfe_admin_orderby = (isset($taxonomy_obj->acfe_admin_orderby) && !empty($taxonomy_obj->acfe_admin_orderby));
     $acfe_admin_order = (isset($taxonomy_obj->acfe_admin_order) && !empty($taxonomy_obj->acfe_admin_order));
 
-    if($acfe_admin_orderby && (!isset($_REQUEST['orderby']) || empty($_REQUEST['orderby'])))
+    if ($acfe_admin_orderby && (!isset($_REQUEST['orderby']) || empty($_REQUEST['orderby']))) {
         $args['orderby'] = $taxonomy_obj->acfe_admin_orderby;
+    }
 
-    if($acfe_admin_order && (!isset($_REQUEST['order']) || empty($_REQUEST['order'])))
+    if ($acfe_admin_order && (!isset($_REQUEST['order']) || empty($_REQUEST['order']))) {
         $args['order'] = $taxonomy_obj->acfe_admin_order;
+    }
 
     return $args;
-
 }
 
 /**
  * Filter Admin: Posts Per Page
  */
-function acfe_dt_filter_admin_ppp($ppp){
-
+function acfe_dt_filter_admin_ppp($ppp)
+{
     global $pagenow;
-    if($pagenow != 'edit-tags.php')
+    if ($pagenow != 'edit-tags.php') {
         return $ppp;
+    }
 
     $taxonomy = $_GET['taxonomy'];
-    if(empty($taxonomy))
+    if (empty($taxonomy)) {
         return $ppp;
+    }
 
     $taxonomy_obj = get_taxonomy($taxonomy);
-    if(!isset($taxonomy_obj->acfe_admin_ppp) || empty($taxonomy_obj->acfe_admin_ppp))
+    if (!isset($taxonomy_obj->acfe_admin_ppp) || empty($taxonomy_obj->acfe_admin_ppp)) {
         return $ppp;
+    }
 
     // Check if user has a screen option
-    if(!empty(get_user_option('edit_' . $taxonomy . '_per_page')))
+    if (!empty(get_user_option('edit_' . $taxonomy . '_per_page'))) {
         return $ppp;
+    }
 
     return $taxonomy_obj->acfe_admin_ppp;
-
 }
 
 /**
  * Filter Front: List + Posts Per Page
  */
 add_action('pre_get_posts', 'acfe_dt_filter_front_list');
-function acfe_dt_filter_front_list($query){
-
-    if(is_admin() || !$query->is_main_query() || !is_tax())
+function acfe_dt_filter_front_list($query)
+{
+    if (is_admin() || !$query->is_main_query() || !is_tax()) {
         return;
+    }
 
     $taxonomy = $query->get('taxonomy');
     $taxonomy_obj = get_taxonomy($taxonomy);
@@ -386,109 +397,106 @@ function acfe_dt_filter_front_list($query){
     $acfe_single_orderby = (isset($taxonomy_obj->acfe_single_orderby) && !empty($taxonomy_obj->acfe_single_orderby));
     $acfe_single_order = (isset($taxonomy_obj->acfe_single_order) && !empty($taxonomy_obj->acfe_single_order));
 
-    if($acfe_single_ppp)
+    if ($acfe_single_ppp) {
         $query->set('posts_per_page', $taxonomy_obj->acfe_single_ppp);
+    }
 
-    if($acfe_single_orderby)
+    if ($acfe_single_orderby) {
         $query->set('orderby', $taxonomy_obj->acfe_single_orderby);
+    }
 
-    if($acfe_single_order)
+    if ($acfe_single_order) {
         $query->set('order', $taxonomy_obj->acfe_single_order);
-
+    }
 }
 
 /**
  * Filter Front: Template
  */
 add_filter('template_include', 'acfe_dt_filter_template', 999);
-function acfe_dt_filter_template($template){
-
-    if(!is_tax() && !is_category() && !is_tag())
+function acfe_dt_filter_template($template)
+{
+    if (!is_tax() && !is_category() && !is_tag()) {
         return $template;
+    }
 
-    if(!isset(get_queried_object()->taxonomy))
+    if (!isset(get_queried_object()->taxonomy)) {
         return $template;
+    }
 
     $taxonomy_obj = get_queried_object()->taxonomy;
 
-    foreach(get_taxonomies(array('public' => true), 'objects') as $taxonomy){
-        if($taxonomy_obj != $taxonomy->name || !isset($taxonomy->acfe_single_template))
+    foreach (get_taxonomies(array('public' => true), 'objects') as $taxonomy) {
+        if ($taxonomy_obj != $taxonomy->name || !isset($taxonomy->acfe_single_template)) {
             continue;
+        }
 
-        if($locate = locate_template(array($taxonomy->acfe_single_template)))
+        if ($locate = locate_template(array($taxonomy->acfe_single_template))) {
             return $locate;
+        }
     }
 
     return $template;
-
 }
 
 /**
  * Admin List Columns
  */
 add_filter('manage_edit-acfe-dt_columns', 'acfe_dt_admin_columns');
-function acfe_dt_admin_columns($columns){
-
-    if(isset($columns['date']))
+function acfe_dt_admin_columns($columns)
+{
+    if (isset($columns['date'])) {
         unset($columns['date']);
+    }
 
     $columns['acfe-name'] = __('Name');
     $columns['acfe-post-types'] = __('Post Types');
     $columns['acfe-terms'] = __('Terms');
 
     return $columns;
-
 }
 
 /**
  * Admin List Columns HTML
  */
 add_action('manage_acfe-dt_posts_custom_column', 'acfe_dt_admin_columns_html', 10, 2);
-function acfe_dt_admin_columns_html($column, $post_id){
+function acfe_dt_admin_columns_html($column, $post_id)
+{
 
     // Name
-    if($column === 'acfe-name'){
-
+    if ($column === 'acfe-name') {
         echo '<code style="-webkit-user-select: all;-moz-user-select: all;-ms-user-select: all;user-select: all;font-size: 12px;">' . get_field('acfe_dt_name', $post_id) . '</code>';
-
     }
 
     // Post Types
-    elseif($column === 'acfe-post-types'){
-
+    elseif ($column === 'acfe-post-types') {
         $post_types = get_field('post_types', $post_id);
 
-        if(empty($post_types)){
-
+        if (empty($post_types)) {
             echo '—';
             return;
-
         }
 
         $post_types_names = array();
-        foreach($post_types as $post_type_slug){
-
+        foreach ($post_types as $post_type_slug) {
             $post_type_obj = get_post_type_object($post_type_slug);
-            if(empty($post_type_obj))
+            if (empty($post_type_obj)) {
                 continue;
+            }
 
             $post_types_names[] = $post_type_obj->label;
-
         }
 
-        if(empty($post_types_names)){
-
+        if (empty($post_types_names)) {
             echo '—';
             return;
-
         }
 
         echo implode(', ', $post_types_names);
-
     }
 
     // Terms
-    elseif($column === 'acfe-terms'){
+    elseif ($column === 'acfe-terms') {
 
         // Name
         $name = get_field('acfe_dt_name', $post_id);
@@ -499,19 +507,18 @@ function acfe_dt_admin_columns_html($column, $post_id){
         ));
 
         echo '<a href="' . admin_url('edit-tags.php?taxonomy=' . $name) . '">' . $count . '</a>';
-
     }
-
 }
 
 /**
  * Admin List Row Actions
  */
-add_filter('post_row_actions','acfe_dt_admin_row', 10, 2);
-function acfe_dt_admin_row($actions, $post){
-
-    if($post->post_type !== 'acfe-dt' || $post->post_status !== 'publish')
+add_filter('post_row_actions', 'acfe_dt_admin_row', 10, 2);
+function acfe_dt_admin_row($actions, $post)
+{
+    if ($post->post_type !== 'acfe-dt' || $post->post_status !== 'publish') {
         return $actions;
+    }
 
     $post_id = $post->ID;
     $name = get_field('acfe_dt_name', $post_id);
@@ -519,92 +526,97 @@ function acfe_dt_admin_row($actions, $post){
     $actions['acfe_dpt_export_json'] = '<a href="' . admin_url('edit.php?post_type=acf-field-group&page=acf-tools&tool=acfe_tool_dt_export&keys=' . $name) . '">' . __('Json') . '</a>';
 
     return $actions;
-
 }
 
 /**
  * Admin Disable Name
  */
 add_filter('acf/prepare_field/name=acfe_dt_name', 'acfe_dt_admin_disable_name');
-function acfe_dt_admin_disable_name($field){
-
+function acfe_dt_admin_disable_name($field)
+{
     global $pagenow;
-    if($pagenow !== 'post.php')
+    if ($pagenow !== 'post.php') {
         return $field;
+    }
 
     $field['disabled'] = true;
 
     return $field;
-
 }
 
 /**
  * Admin Validate Name
  */
 add_filter('acf/validate_value/name=acfe_dt_name', 'acfe_dt_admin_validate_name', 10, 4);
-function acfe_dt_admin_validate_name($valid, $value, $field, $input){
-
-	if(!$valid)
+function acfe_dt_admin_validate_name($valid, $value, $field, $input)
+{
+    if (!$valid) {
         return $valid;
+    }
 
     // Reserved taxonomies
     $excludes = array('acf-field-group-category');
-    if(in_array($value, $excludes))
+    if (in_array($value, $excludes)) {
         return __('This taxonomy name is reserved');
+    }
 
     // Editing Current Dynamic Taxonomy
     $current_post_id = $_POST['_acf_post_id'];
     $current_post_type = false;
-    if(!empty($current_post_id))
+    if (!empty($current_post_id)) {
         $current_post_type = get_field('acfe_dt_name', $current_post_id);
+    }
 
-    if($value === $current_post_type)
+    if ($value === $current_post_type) {
         return $valid;
+    }
 
     // Listing WP Taxonomies
     global $wp_taxonomies;
-    if(!empty($wp_taxonomies)){
-        foreach($wp_taxonomies as $taxonomy){
-            if($value != $taxonomy->name)
+    if (!empty($wp_taxonomies)) {
+        foreach ($wp_taxonomies as $taxonomy) {
+            if ($value != $taxonomy->name) {
                 continue;
+            }
 
             $valid = __('This taxonomy name already exists');
         }
     }
 
-	return $valid;
-
+    return $valid;
 }
 
 /**
  * Admin Add Config Button
  */
 add_action('admin_footer-edit-tags.php', 'acfe_dt_admin_footer', 99);
-function acfe_dt_admin_footer(){
-
-    if(!current_user_can(acf_get_setting('capability')))
+function acfe_dt_admin_footer()
+{
+    if (!current_user_can(acf_get_setting('capability'))) {
         return;
+    }
 
     // Get taxonomy
     global $taxnow;
 
     // Check taxonomy
     $taxonomy = $taxnow;
-    if(empty($taxonomy))
+    if (empty($taxonomy)) {
         return;
+    }
 
     // Taxonomy object
     $taxonomy_obj = get_taxonomy($taxonomy);
-    if(!isset($taxonomy_obj->acfe_admin_ppp))
+    if (!isset($taxonomy_obj->acfe_admin_ppp)) {
         return;
+    }
 
     // Get Dynamic Post Type Post
     $acfe_dt_post_type = get_page_by_path($taxonomy, 'OBJECT', 'acfe-dt');
 
-    if(empty($acfe_dt_post_type))
+    if (empty($acfe_dt_post_type)) {
         return;
-
-    ?>
+    } ?>
     <script type="text/html" id="tmpl-acfe-dt-title-config">
         &nbsp;<a href="<?php echo admin_url('post.php?post=' . $acfe_dt_post_type->ID . '&action=edit'); ?>" class="page-title-action acfe-dt-admin-config"><span class="dashicons dashicons-admin-generic"></span></a>
     </script>
@@ -618,12 +630,11 @@ function acfe_dt_admin_footer(){
     })(jQuery);
     </script>
     <?php
-
 }
 
 add_action('init', 'acfe_dt_local_field_group');
-function acfe_dt_local_field_group(){
-
+function acfe_dt_local_field_group()
+{
     acf_add_local_field_group(array(
         'key' => 'group_acfe_dynamic_taxonomy',
         'title' => __('Dynamic Taxonomy', 'acfe'),
@@ -1936,5 +1947,4 @@ function acfe_dt_local_field_group(){
             ),
         ),
     ));
-
 }

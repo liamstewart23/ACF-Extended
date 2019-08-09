@@ -1,14 +1,15 @@
 <?php
 
-if(!defined('ABSPATH'))
+if (!defined('ABSPATH')) {
     exit;
+}
 
 /**
  * Register Dynamic Options Page
  */
 add_action('init', 'acfe_dop_register');
-function acfe_dop_register(){
-    
+function acfe_dop_register()
+{
     register_post_type('acfe-dop', array(
         'label'                 => 'Options Page',
         'description'           => 'Options Page',
@@ -44,56 +45,57 @@ function acfe_dop_register(){
             'read_post'             => acf_get_setting('capability'),
         )
     ));
-
 }
 
 /**
  * Dynamic Options Page Menu
  */
 add_action('admin_menu', 'acfe_dop_menu');
-function acfe_dop_menu(){
-    
-    if(!acf_get_setting('show_admin'))
+function acfe_dop_menu()
+{
+    if (!acf_get_setting('show_admin')) {
         return;
+    }
     
     add_submenu_page('edit.php?post_type=acf-field-group', __('Options'), __('Options'), acf_get_setting('capability'), 'edit.php?post_type=acfe-dop');
-    
 }
 
 /**
  * Dynamic Options Page Menu: Parent Highlight
  */
 add_filter('parent_file', 'acfe_dop_menu_parent_highlight');
-function acfe_dop_menu_parent_highlight($parent_file){
-    
+function acfe_dop_menu_parent_highlight($parent_file)
+{
     global $pagenow;
-    if($pagenow != 'post.php' && $pagenow != 'post-new.php')
+    if ($pagenow != 'post.php' && $pagenow != 'post-new.php') {
         return $parent_file;
+    }
     
     $post_type = get_post_type();
-    if($post_type != 'acfe-dop')
+    if ($post_type != 'acfe-dop') {
         return $parent_file;
+    }
     
     return 'edit.php?post_type=acf-field-group';
-    
 }
 
 /**
  * Dynamic Options Page Menu: Submenu Highlight
  */
 add_filter('submenu_file', 'acfe_dop_menu_sub_highlight');
-function acfe_dop_menu_sub_highlight($submenu_file){
-    
+function acfe_dop_menu_sub_highlight($submenu_file)
+{
     global $pagenow;
-    if($pagenow != 'post-new.php')
+    if ($pagenow != 'post-new.php') {
         return $submenu_file;
+    }
     
     $post_type = get_post_type();
-    if($post_type != 'acfe-dop')
+    if ($post_type != 'acfe-dop') {
         return $submenu_file;
+    }
     
     return 'edit.php?post_type=acfe-dop';
-    
 }
 
 
@@ -101,85 +103,79 @@ function acfe_dop_menu_sub_highlight($submenu_file){
  * ACF Register Options Pages
  */
 add_action('init', 'acfe_dop_registers');
-function acfe_dop_registers(){
-    
+function acfe_dop_registers()
+{
     $dynamic_options_pages = get_option('acfe_dynamic_options_pages', array());
-    if(empty($dynamic_options_pages))
+    if (empty($dynamic_options_pages)) {
         return;
+    }
     
     $options_sub_pages = array();
     
-    foreach($dynamic_options_pages as $name => $register_args){
+    foreach ($dynamic_options_pages as $name => $register_args) {
         
         // Do not register sub pages
-        if(isset($register_args['parent_slug']) && !empty($register_args['parent_slug'])){
-            
+        if (isset($register_args['parent_slug']) && !empty($register_args['parent_slug'])) {
             $options_sub_pages[$name] = $register_args;
             continue;
-            
         }
         
         // Register: Execute
         acf_add_options_page($register_args);
-        
     }
     
     // Register sub pages
-    if(!empty($options_sub_pages)){
-        
-        foreach($options_sub_pages as $name => $register_args){
+    if (!empty($options_sub_pages)) {
+        foreach ($options_sub_pages as $name => $register_args) {
             
             // Register: Execute
             acf_add_options_page($register_args);
-            
-        } 
-        
+        }
     }
-
 }
 
 /**
  * ACF Exclude Dynamic Options Page from available post types
  */
 add_filter('acf/get_post_types', 'acfe_dop_exclude', 10, 2);
-function acfe_dop_exclude($post_types, $args){
-    
-    if(empty($post_types))
+function acfe_dop_exclude($post_types, $args)
+{
+    if (empty($post_types)) {
         return $post_types;
+    }
     
-    foreach($post_types as $k => $post_type){
-        
-        if($post_type != 'acfe-dop')
+    foreach ($post_types as $k => $post_type) {
+        if ($post_type != 'acfe-dop') {
             continue;
+        }
         
         unset($post_types[$k]);
-        
     }
     
     return $post_types;
-    
 }
 
 /**
  * Dynamic Options Page Save
  */
 add_action('acf/save_post', 'acfe_dop_filter_save', 20);
-function acfe_dop_filter_save($post_id){
-    
-    if(get_post_type($post_id) != 'acfe-dop')
+function acfe_dop_filter_save($post_id)
+{
+    if (get_post_type($post_id) != 'acfe-dop') {
         return;
+    }
     
     $title = get_field('page_title', $post_id);
     $name = get_field('acfe_dop_name', $post_id);
     $parent_slug = get_field('parent_slug', $post_id);
     
     // Force name
-    if(empty($name))
+    if (empty($name)) {
         $name = sanitize_title($title);
+    }
     
     $parent = 0;
-    if(!empty($parent_slug)){
-        
+    if (!empty($parent_slug)) {
         $get_dop_parent = get_posts(array(
             'post_type'         => 'acfe-dop',
             'posts_per_page'    => 1,
@@ -192,9 +188,9 @@ function acfe_dop_filter_save($post_id){
             )
         ));
         
-        if(!empty($get_dop_parent))
+        if (!empty($get_dop_parent)) {
             $parent = $get_dop_parent[0];
-        
+        }
     }
     
     // Update post
@@ -235,26 +231,31 @@ function acfe_dop_filter_save($post_id){
     );
     
     // Menu title
-    if(empty($menu_title))
+    if (empty($menu_title)) {
         $register_args['menu_title'] = $page_title;
+    }
     
     // Menu slug
-    if(empty($menu_slug))
+    if (empty($menu_slug)) {
         $register_args['menu_slug'] = sanitize_title($register_args['menu_title']);
+    }
     
     // Redirect
     $register_args['redirect'] = true;
-    if(empty($redirect))
+    if (empty($redirect)) {
         $register_args['redirect'] = false;
+    }
     
     // Post ID
-    if(empty($p_id))
+    if (empty($p_id)) {
         $register_args['post_id'] = 'options';
+    }
     
     // Autoload
     $register_args['autoload'] = true;
-    if(empty($autoload))
+    if (empty($autoload)) {
         $register_args['autoload'] = false;
+    }
         
     // Get ACFE option
     $option = get_option('acfe_dynamic_options_pages', array());
@@ -267,17 +268,17 @@ function acfe_dop_filter_save($post_id){
     
     // Update ACFE option
     update_option('acfe_dynamic_options_pages', $option);
-    
 }
 
 /**
  * Dynamic Options Page Status Publish > Trash
  */
 add_action('publish_to_trash', 'acfe_dop_filter_status_trash');
-function acfe_dop_filter_status_trash($post){
-    
-    if(get_post_type($post->ID) != 'acfe-dop')
+function acfe_dop_filter_status_trash($post)
+{
+    if (get_post_type($post->ID) != 'acfe-dop') {
         return;
+    }
     
     $post_id = $post->ID;
     $title = get_field('page_title', $post_id);
@@ -287,169 +288,170 @@ function acfe_dop_filter_status_trash($post){
     $option = get_option('acfe_dynamic_options_pages', array());
     
     // Check ACFE option
-    if(isset($option[$name]))
+    if (isset($option[$name])) {
         unset($option[$name]);
+    }
     
     // Update ACFE option
     update_option('acfe_dynamic_options_pages', $option);
-    
 }
 
 /**
  * Dynamic Options Page Status Trash > Publish
  */
 add_action('trash_to_publish', 'acfe_dop_filter_status_publish');
-function acfe_dop_filter_status_publish($post){
-    
-    if(get_post_type($post->ID) != 'acfe-dop')
+function acfe_dop_filter_status_publish($post)
+{
+    if (get_post_type($post->ID) != 'acfe-dop') {
         return;
+    }
     
     acfe_dop_filter_save($post->ID);
-    
 }
 
 /**
  * Dynamic Options Page Admin: List
  */
 add_action('pre_get_posts', 'acfe_dop_admin_pre_get_posts');
-function acfe_dop_admin_pre_get_posts($query){
-    
-    if(!is_admin() || !$query->is_main_query())
+function acfe_dop_admin_pre_get_posts($query)
+{
+    if (!is_admin() || !$query->is_main_query()) {
         return;
+    }
     
     global $pagenow;
-    if($pagenow != 'edit.php')
+    if ($pagenow != 'edit.php') {
         return;
+    }
     
     $post_type = $query->get('post_type');
-    if($post_type != 'acfe-dop')
+    if ($post_type != 'acfe-dop') {
         return;
+    }
     
     $query->set('orderby', 'name');
     $query->set('order', 'ASC');
-    
 }
 
 /**
  * Dynamic Options Page Admin: Posts Per Page
  */
 add_filter('edit_posts_per_page', 'acfe_dop_admin_ppp', 10, 2);
-function acfe_dop_admin_ppp($ppp, $post_type){
-    
-    if($post_type != 'acfe-dop')
+function acfe_dop_admin_ppp($ppp, $post_type)
+{
+    if ($post_type != 'acfe-dop') {
         return $ppp;
+    }
     
     global $pagenow;
-    if($pagenow != 'edit.php')
+    if ($pagenow != 'edit.php') {
         return $ppp;
+    }
     
     return 999;
-    
 }
 
 /**
  * Admin List Columns
  */
 add_filter('manage_edit-acfe-dop_columns', 'acfe_dop_admin_columns');
-function acfe_dop_admin_columns($columns){
-    
-    if(isset($columns['date']))
+function acfe_dop_admin_columns($columns)
+{
+    if (isset($columns['date'])) {
         unset($columns['date']);
+    }
     
     $columns['name'] = __('Name');
     $columns['post_id'] = __('Post ID');
     $columns['autoload'] = __('Autoload');
     
     return $columns;
-    
 }
 
 /**
  * Admin List Columns HTML
  */
 add_action('manage_acfe-dop_posts_custom_column', 'acfe_dop_admin_columns_html', 10, 2);
-function acfe_dop_admin_columns_html($column, $post_id){
+function acfe_dop_admin_columns_html($column, $post_id)
+{
     
     // Name
-    if($column=== 'name'){
-        
+    if ($column=== 'name') {
         $name = get_field('acfe_dop_name', $post_id);
         
         echo '<code style="-webkit-user-select: all;-moz-user-select: all;-ms-user-select: all;user-select: all;font-size: 12px;">' . $name . '</code>';
-        
     }
     
     // Post ID
-    elseif($column=== 'post_id'){
-        
+    elseif ($column=== 'post_id') {
         $p_id = get_field('post_id', $post_id);
-        if(empty($p_id))
+        if (empty($p_id)) {
             $p_id = 'options';
+        }
         
         echo '<code style="-webkit-user-select: all;-moz-user-select: all;-ms-user-select: all;user-select: all;font-size: 12px;">' . $p_id. '</code>';
-        
     }
     
     // Autoload
-    elseif($column=== 'autoload'){
-        
+    elseif ($column=== 'autoload') {
         $autoload = get_field('autoload', $post_id);
         
-        if(empty($autoload))
+        if (empty($autoload)) {
             echo 'No';
-        else
+        } else {
             echo 'Yes';
-        
+        }
     }
-    
 }
 
 /**
  * Admin List Row Actions
  */
-add_filter('page_row_actions','acfe_dop_admin_row', 10, 2);
-function acfe_dop_admin_row($actions, $post){
-
-    if($post->post_type != 'acfe-dop' || $post->post_status != 'publish')
+add_filter('page_row_actions', 'acfe_dop_admin_row', 10, 2);
+function acfe_dop_admin_row($actions, $post)
+{
+    if ($post->post_type != 'acfe-dop' || $post->post_status != 'publish') {
         return $actions;
+    }
     
     $name = get_field('acfe_dop_name', $post->ID);
     
     $actions['acfe_dpt_export_json'] = '<a href="' . admin_url('edit.php?post_type=acf-field-group&page=acf-tools&tool=acfe_tool_dop_export&keys=' . $name) . '">' . __('Json') . '</a>';
     
     return $actions;
-    
 }
 
 /**
  * Admin Disable Name
  */
 add_filter('acf/prepare_field/name=acfe_dop_name', 'acfe_dop_admin_disable_name');
-function acfe_dop_admin_disable_name($field){
-    
+function acfe_dop_admin_disable_name($field)
+{
     global $pagenow;
-    if($pagenow != 'post.php')
+    if ($pagenow != 'post.php') {
         return $field;
+    }
     
     $field['disabled'] = true;
     
     return $field;
-    
 }
 
 /**
  * Admin Force Name
  */
 add_action('load-edit.php', 'acfe_dop_admin_name_value');
-function acfe_dop_admin_name_value(){
+function acfe_dop_admin_name_value()
+{
     
     // Get post type
     global $typenow;
     
     // Check post type
     $post_type = $typenow;
-    if(empty($post_type) || $post_type != 'acfe-dop')
+    if (empty($post_type) || $post_type != 'acfe-dop') {
         return;
+    }
     
     $get_options = get_posts(array(
         'post_type'         => 'acfe-dop',
@@ -457,26 +459,25 @@ function acfe_dop_admin_name_value(){
         'fields'            => 'ids'
     ));
     
-    if(empty($get_options))
+    if (empty($get_options)) {
         return;
-    
-    foreach($get_options as $post_id){
-        
-        if(get_field('acfe_dop_name', $post_id))
-            continue;
-        
-        update_field('acfe_dop_name', sanitize_title(get_field('page_title', $post_id)), $post_id);
-        
     }
     
+    foreach ($get_options as $post_id) {
+        if (get_field('acfe_dop_name', $post_id)) {
+            continue;
+        }
+        
+        update_field('acfe_dop_name', sanitize_title(get_field('page_title', $post_id)), $post_id);
+    }
 }
 
 /**
  * Dynamic Options Page: Local Field Group
  */
 add_action('init', 'acfe_dop_local_field_group');
-function acfe_dop_local_field_group(){
-    
+function acfe_dop_local_field_group()
+{
     acf_add_local_field_group(array(
         'key' => 'group_acfe_dynamic_options_page',
         'title' => __('Dynamic Options Page', 'acfe'),
@@ -802,5 +803,4 @@ function acfe_dop_local_field_group(){
             ),
         ),
     ));
-    
 }
