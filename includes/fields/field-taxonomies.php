@@ -1,11 +1,13 @@
 <?php
 
-if(!defined('ABSPATH'))
+if (!defined('ABSPATH')) {
     exit;
+}
 
-class acfe_field_taxonomies extends acf_field{
-    
-    function __construct(){
+class acfe_field_taxonomies extends acf_field
+{
+    public function __construct()
+    {
         $this->name = 'acfe_taxonomies';
         $this->label = __('Taxonomies', 'acfe');
         $this->category = 'relational';
@@ -17,63 +19,58 @@ class acfe_field_taxonomies extends acf_field{
         parent::__construct();
     }
 
-    function render_field($field){
+    public function render_field($field)
+    {
         
         // force value to array
         $field['value'] = acf_get_array($field['value']);
         
-        if( $field['field_type'] === 'select' ) {
-            
-            $this->render_field_select( $field );
-        
-        } elseif( $field['field_type'] === 'radio' ) {
-            
-            $this->render_field_checkbox( $field );
-            
-        } elseif( $field['field_type'] === 'checkbox' ) {
-        
-            $this->render_field_checkbox( $field );
-            
+        if ($field['field_type'] === 'select') {
+            $this->render_field_select($field);
+        } elseif ($field['field_type'] === 'radio') {
+            $this->render_field_checkbox($field);
+        } elseif ($field['field_type'] === 'checkbox') {
+            $this->render_field_checkbox($field);
         }
-        
     }
     
-    function render_field_select($field){
+    public function render_field_select($field)
+    {
         
         // Change Field into a select
         $field['type'] = 'select';
         $field['ui'] = 0;
         $field['ajax'] = 0;
         $field['choices'] = get_taxonomies(array(
-            'public' => true, 
+            'public' => true,
             'show_ui' => true
         ), 'names');
         
         acf_render_field($field);
-        
     }
     
-    function render_field_checkbox($field){
-        
+    public function render_field_checkbox($field)
+    {
         acf_hidden_input(array(
             'type'	=> 'hidden',
             'name'	=> $field['name'],
         ));
         
-        if($field['field_type'] === 'checkbox')
+        if ($field['field_type'] === 'checkbox') {
             $field['name'] .= '[]';
+        }
         
         $taxonomies = get_taxonomies(array(
-            'public' => true, 
+            'public' => true,
             'show_ui' => true
-        ), 'objects');
-        
-        ?>
+        ), 'objects'); ?>
         <div class="categorychecklist-holder">
             <ul class="acf-checkbox-list acf-bl">
             
-                <?php if(!empty($taxonomies)){ ?>
-                    <?php foreach($taxonomies as $taxonomy){ ?>
+                <?php if (!empty($taxonomies)) {
+            ?>
+                    <?php foreach ($taxonomies as $taxonomy) {
+                ?>
                         <?php $selected = in_array($taxonomy->name, $field['value']); ?>
                         <li>
                             <label <?php echo $selected ? 'class="selected"' : ''; ?>>
@@ -82,20 +79,22 @@ class acfe_field_taxonomies extends acf_field{
                             </label>
                         </li>
                         
-                    <?php } ?>
-                <?php } ?>
+                    <?php
+            } ?>
+                <?php
+        } ?>
                 
             </ul>
         </div>
         <?php
-        
     }
     
-    function render_field_settings($field){
+    public function render_field_settings($field)
+    {
         
         // field_type
-        acf_render_field_setting( $field, array(
-            'label'			=> __('Appearance','acf'),
+        acf_render_field_setting($field, array(
+            'label'			=> __('Appearance', 'acf'),
             'instructions'	=> __('Select the appearance of this field', 'acf'),
             'type'			=> 'select',
             'name'			=> 'field_type',
@@ -108,7 +107,7 @@ class acfe_field_taxonomies extends acf_field{
         ));
         
         // return_format
-        acf_render_field_setting( $field, array(
+        acf_render_field_setting($field, array(
             'label'			=> __('Return Value', 'acf'),
             'instructions'	=> '',
             'type'			=> 'radio',
@@ -119,48 +118,44 @@ class acfe_field_taxonomies extends acf_field{
             ),
             'layout'	=>	'horizontal',
         ));
-        
     }
     
-    function format_value($value, $post_id, $field){
-        
-        if(empty($value))
+    public function format_value($value, $post_id, $field)
+    {
+        if (empty($value)) {
             return false;
+        }
         
         // force value to array
         $value = acf_get_array($value);
         
         // format = name
-        if($field['return_format'] === 'name'){
-            
-            if($field['field_type'] === 'select' || $field['field_type'] === 'radio')
+        if ($field['return_format'] === 'name') {
+            if ($field['field_type'] === 'select' || $field['field_type'] === 'radio') {
                 return array_shift($value);
+            }
             
             return $value;
-            
         }
         
         // format = object
-        elseif($field['return_format'] === 'object'){
-            
+        elseif ($field['return_format'] === 'object') {
             $taxonomies = array();
             
-            foreach($value as $taxonomy){
+            foreach ($value as $taxonomy) {
                 $taxonomies[] = get_taxonomy($taxonomy);
             }
             
-            if($field['field_type'] === 'select' || $field['field_type'] === 'radio')
+            if ($field['field_type'] === 'select' || $field['field_type'] === 'radio') {
                 return array_shift($taxonomies);
+            }
             
             return $taxonomies;
-            
         }
         
         // return
         return $value;
-        
     }
-
 }
 
 new acfe_field_taxonomies();

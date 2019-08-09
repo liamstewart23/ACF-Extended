@@ -2,8 +2,9 @@
     
     <?php
     $title = __('Edit Option');
-    if($_REQUEST['action'] === 'add')
+    if ($_REQUEST['action'] === 'add') {
         $title = __('Add Option');
+    }
     ?>
     <h1 class="wp-heading-inline"><?php echo $title; ?></h1>
     
@@ -11,7 +12,7 @@
     
     <form id="post" method="post" name="post">
         
-        <?php 
+        <?php
         
         // render post data
         acf_form_data(array(

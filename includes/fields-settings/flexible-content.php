@@ -1,13 +1,15 @@
 <?php
 
-if(!defined('ABSPATH'))
+if (!defined('ABSPATH')) {
     exit;
+}
 
 /**
  * Add Settings
  */
 add_action('acf/render_field_settings/type=flexible_content', 'acfe_flexible_settings', 0);
-function acfe_flexible_settings($field){
+function acfe_flexible_settings($field)
+{
     
     // Stylised button
     acf_render_field_setting($field, array(
@@ -295,14 +297,14 @@ function acfe_flexible_settings($field){
             )
         )
     ), true);
-    
 }
 
 add_action('acf/render_field', 'acfe_flexible_layouts_settings_before', 0);
-function acfe_flexible_layouts_settings_before($field){
-    
-    if($field['_name'] != 'label' || stripos($field['name'], '[layouts]') === false)
+function acfe_flexible_layouts_settings_before($field)
+{
+    if ($field['_name'] != 'label' || stripos($field['name'], '[layouts]') === false) {
         return;
+    }
     
     echo '</li>';
     
@@ -313,14 +315,14 @@ function acfe_flexible_layouts_settings_before($field){
     ), 'ul');
     
     echo '<li>';
-    
 }
 
 add_action('acf/render_field', 'acfe_flexible_layouts_settings', 10);
-function acfe_flexible_layouts_settings($field){
-    
-    if($field['_name'] != 'max' || stripos($field['name'], '[layouts]') === false)
+function acfe_flexible_layouts_settings($field)
+{
+    if ($field['_name'] != 'max' || stripos($field['name'], '[layouts]') === false) {
         return;
+    }
     
     $layout_prefix = $field['prefix'];
 
@@ -339,8 +341,7 @@ function acfe_flexible_layouts_settings($field){
     $is_flexible_modal_categories = isset($field_flexible['acfe_flexible_modal']['acfe_flexible_modal_categories']) && !empty($field_flexible['acfe_flexible_modal']['acfe_flexible_modal_categories']);
     
     // Category
-    if($is_flexible_modal_enabled && $is_flexible_modal_categories){
-        
+    if ($is_flexible_modal_enabled && $is_flexible_modal_categories) {
         $acfe_flexible_category = isset($layout['acfe_flexible_category']) ? $layout['acfe_flexible_category'] : '';
 
         acf_render_field_wrap(array(
@@ -369,12 +370,10 @@ function acfe_flexible_layouts_settings($field){
             */
             
         ), 'ul');
-    
     }
     
     // Template
-    if($is_flexible_layouts_templates){
-        
+    if ($is_flexible_layouts_templates) {
         $acfe_flexible_render_template = isset($layout['acfe_flexible_render_template']) ? $layout['acfe_flexible_render_template'] : '';
         
         acf_render_field_wrap(array(
@@ -450,12 +449,10 @@ function acfe_flexible_layouts_settings($field){
             */
             
         ), 'ul');
-    
     }
     
     // Thumbnail
-    if($is_flexible_layouts_thumbnails){
-        
+    if ($is_flexible_layouts_thumbnails) {
         $acfe_flexible_thumbnail = isset($layout['acfe_flexible_thumbnail']) ? $layout['acfe_flexible_thumbnail'] : '';
         
         acf_render_field_wrap(array(
@@ -482,93 +479,75 @@ function acfe_flexible_layouts_settings($field){
             */
             
         ), 'ul');
-    
     }
-    
 }
 
 add_filter('acf/field_wrapper_attributes', 'acfe_flexible_wrapper', 10, 2);
-function acfe_flexible_wrapper($wrapper, $field){
-    
-    if($field['type'] != 'flexible_content')
+function acfe_flexible_wrapper($wrapper, $field)
+{
+    if ($field['type'] != 'flexible_content') {
         return $wrapper;
+    }
     
     // Stylised button
-    if(isset($field['acfe_flexible_stylised_button']) && !empty($field['acfe_flexible_stylised_button'])){
-        
+    if (isset($field['acfe_flexible_stylised_button']) && !empty($field['acfe_flexible_stylised_button'])) {
         $wrapper['data-acfe-flexible-stylised-button'] = 1;
-        
     }
     
     // Hide Empty Message
-    if(isset($field['acfe_flexible_hide_empty_message']) && !empty($field['acfe_flexible_hide_empty_message']) || isset($field['acfe_flexible_stylised_button']) && !empty($field['acfe_flexible_stylised_button'])){
-        
+    if (isset($field['acfe_flexible_hide_empty_message']) && !empty($field['acfe_flexible_hide_empty_message']) || isset($field['acfe_flexible_stylised_button']) && !empty($field['acfe_flexible_stylised_button'])) {
         $wrapper['data-acfe-flexible-hide-empty-message'] = 1;
-        
     }
     
     // Modal: Edition
-    if(isset($field['acfe_flexible_modal_edition']) && !empty($field['acfe_flexible_modal_edition'])){
-        
+    if (isset($field['acfe_flexible_modal_edition']) && !empty($field['acfe_flexible_modal_edition'])) {
         $wrapper['data-acfe-flexible-modal-edition'] = 1;
-    
     }
     
     // Modal: Selection
-    if(isset($field['acfe_flexible_modal']['acfe_flexible_modal_enabled']) && !empty($field['acfe_flexible_modal']['acfe_flexible_modal_enabled'])){
-        
+    if (isset($field['acfe_flexible_modal']['acfe_flexible_modal_enabled']) && !empty($field['acfe_flexible_modal']['acfe_flexible_modal_enabled'])) {
         $wrapper['data-acfe-flexible-modal'] = 1;
         
         // Columns
-        if(isset($field['acfe_flexible_modal']['acfe_flexible_modal_col']) && !empty($field['acfe_flexible_modal']['acfe_flexible_modal_col']))
+        if (isset($field['acfe_flexible_modal']['acfe_flexible_modal_col']) && !empty($field['acfe_flexible_modal']['acfe_flexible_modal_col'])) {
             $wrapper['data-acfe-flexible-modal-col'] = $field['acfe_flexible_modal']['acfe_flexible_modal_col'];
+        }
         
         // Title
-        if(isset($field['acfe_flexible_modal']['acfe_flexible_modal_title']) && !empty($field['acfe_flexible_modal']['acfe_flexible_modal_title']))
+        if (isset($field['acfe_flexible_modal']['acfe_flexible_modal_title']) && !empty($field['acfe_flexible_modal']['acfe_flexible_modal_title'])) {
             $wrapper['data-acfe-flexible-modal-title'] = $field['acfe_flexible_modal']['acfe_flexible_modal_title'];
-    
+        }
     }
     
     // Layouts: Close Button
-    if(isset($field['acfe_flexible_close_button']) && !empty($field['acfe_flexible_close_button'])){
-        
+    if (isset($field['acfe_flexible_close_button']) && !empty($field['acfe_flexible_close_button'])) {
         $wrapper['data-acfe-flexible-close-button'] = 1;
-        
     }
     
     // Layouts: Copy/paste
-    if(isset($field['acfe_flexible_copy_paste']) && !empty($field['acfe_flexible_copy_paste'])){
-        
+    if (isset($field['acfe_flexible_copy_paste']) && !empty($field['acfe_flexible_copy_paste'])) {
         $wrapper['data-acfe-flexible-copy-paste'] = 1;
-        
     }
     
     // Layouts: State
-    if(isset($field['acfe_flexible_layouts_state']) && !empty($field['acfe_flexible_layouts_state'])){
+    if (isset($field['acfe_flexible_layouts_state']) && !empty($field['acfe_flexible_layouts_state'])) {
         
         // Collapse
-        if($field['acfe_flexible_layouts_state'] === 'collapse'){
-            
+        if ($field['acfe_flexible_layouts_state'] === 'collapse') {
             $wrapper['data-acfe-flexible-collapse'] = 1;
-            
         }
         
         // Open
-        elseif($field['acfe_flexible_layouts_state'] === 'open'){
-            
+        elseif ($field['acfe_flexible_layouts_state'] === 'open') {
             $wrapper['data-acfe-flexible-open'] = 1;
-            
         }
-        
     }
     
     $thumbnails = array();
     
     // Layouts Previews
-    if(isset($field['acfe_flexible_layouts_templates']) && !empty($field['acfe_flexible_layouts_templates']) && isset($field['acfe_flexible_layouts_previews']) && !empty($field['acfe_flexible_layouts_previews'])){
-        
+    if (isset($field['acfe_flexible_layouts_templates']) && !empty($field['acfe_flexible_layouts_templates']) && isset($field['acfe_flexible_layouts_previews']) && !empty($field['acfe_flexible_layouts_previews'])) {
         $wrapper['data-acfe-flexible-preview'] = 1;
-        
     }
     
     // Placeholder Icon
@@ -577,48 +556,50 @@ function acfe_flexible_wrapper($wrapper, $field){
     $layout_placeholder_icon = apply_filters('acfe/flexible/placeholder/icon/name=' . $field['_name'], $layout_placeholder_icon, $field);
     $layout_placeholder_icon = apply_filters('acfe/flexible/placeholder/icon/key=' . $field['key'], $layout_placeholder_icon, $field);
     
-    if(!empty($layout_placeholder_icon))
+    if (!empty($layout_placeholder_icon)) {
         $wrapper['data-acfe-flexible-placeholder-icon'] = $layout_placeholder_icon;
+    }
     
     return $wrapper;
-    
 }
 
 add_filter('acf/fields/flexible_content/no_value_message', 'acfe_flexible_empty_message', 10, 2);
-function acfe_flexible_empty_message($message, $field){
-    
-    if(!isset($field['acfe_flexible_empty_message']) || empty($field['acfe_flexible_empty_message']))
+function acfe_flexible_empty_message($message, $field)
+{
+    if (!isset($field['acfe_flexible_empty_message']) || empty($field['acfe_flexible_empty_message'])) {
         return $message;
+    }
     
     return $field['acfe_flexible_empty_message'];
-    
 }
 
 add_filter('acf/prepare_field/type=flexible_content', 'acfe_flexible_layout_title_prepare');
-function acfe_flexible_layout_title_prepare($field){
-    
-    if(empty($field['layouts']))
+function acfe_flexible_layout_title_prepare($field)
+{
+    if (empty($field['layouts'])) {
         return $field;
+    }
     
-    foreach($field['layouts'] as $k => &$layout){
+    foreach ($field['layouts'] as $k => &$layout) {
         
         // Thumbnail
         $thumbnail = false;
-        if(isset($field['acfe_flexible_layouts_thumbnails']) && !empty($field['acfe_flexible_layouts_thumbnails'])){
-            
+        if (isset($field['acfe_flexible_layouts_thumbnails']) && !empty($field['acfe_flexible_layouts_thumbnails'])) {
             $class = $style = array();
             $class[] = 'acfe-flexible-layout-thumbnail';
             
             // Modal disabled
-            if(!isset($field['acfe_flexible_modal']['acfe_flexible_modal_enabled']) || empty($field['acfe_flexible_modal']['acfe_flexible_modal_enabled']))
+            if (!isset($field['acfe_flexible_modal']['acfe_flexible_modal_enabled']) || empty($field['acfe_flexible_modal']['acfe_flexible_modal_enabled'])) {
                 $class[] = 'acfe-flexible-layout-thumbnail-no-modal';
+            }
             
             // Thumbnail is set
             $thumbnail_found = false;
             
             $acfe_flexible_thumbnail = false;
-            if(isset($layout['acfe_flexible_thumbnail']) && !empty($layout['acfe_flexible_thumbnail']))
+            if (isset($layout['acfe_flexible_thumbnail']) && !empty($layout['acfe_flexible_thumbnail'])) {
                 $acfe_flexible_thumbnail = $layout['acfe_flexible_thumbnail'];
+            }
             
             // Filter: acfe/flexible/layout/thumbnail/name={field:flexible:name}&layout={field:flexible:layout_name}
             // Flexible Thumbnails
@@ -629,78 +610,66 @@ function acfe_flexible_layout_title_prepare($field){
             $acfe_flexible_thumbnail = apply_filters('acfe/flexible/layout/thumbnail/name=' . $field['_name'] . '&layout=' . $layout['name'], $acfe_flexible_thumbnail, $field, $layout);
             $acfe_flexible_thumbnail = apply_filters('acfe/flexible/layout/thumbnail/key=' . $field['key'] . '&layout=' . $layout['name'], $acfe_flexible_thumbnail, $field, $layout);
             
-            if(!empty($acfe_flexible_thumbnail)){
+            if (!empty($acfe_flexible_thumbnail)) {
             
                 // Thumbnail ID
-                if(is_numeric($acfe_flexible_thumbnail)){
-                    
-                    if($thumbnail_src = wp_get_attachment_url($acfe_flexible_thumbnail)){
-                        
+                if (is_numeric($acfe_flexible_thumbnail)) {
+                    if ($thumbnail_src = wp_get_attachment_url($acfe_flexible_thumbnail)) {
                         $thumbnail_found = true;
                         $style[] = 'background-image:url(' . $thumbnail_src . ');';
-                        
                     }
-                    
                 }
                 
                 // Thumbnail URL
-                else{
-                    
+                else {
                     $thumbnail_found = true;
                     $style[] = 'background-image:url(' . $acfe_flexible_thumbnail . ');';
-                    
                 }
-            
             }
             
             // Thumbnail not found
-            if(!$thumbnail_found){
-                
+            if (!$thumbnail_found) {
                 $class[] = 'acfe-flexible-layout-thumbnail-not-found';
-                
             }
             
             $thumbnail = '<div class="' . implode(' ', $class) . '" style="' . implode(' ', $style) . '"></div>';
-            
         }
         
         // Category
         $category = '';
-        if(isset($layout['acfe_flexible_category']) && !empty($layout['acfe_flexible_category'])){
-            
+        if (isset($layout['acfe_flexible_category']) && !empty($layout['acfe_flexible_category'])) {
             $category = 'data-acfe-flexible-category="' . $layout['acfe_flexible_category'] . '"';
-            
         }
         
         $layout['label'] = $thumbnail . '<span '.$category.'>' . $layout['label'] . '</span>';
-        
     }
     
     return $field;
-    
 }
 
 add_filter('acf/fields/flexible_content/layout_title', 'acfe_flexible_layout_title_ajax', 0, 4);
-function acfe_flexible_layout_title_ajax($title, $field, $layout, $i){
+function acfe_flexible_layout_title_ajax($title, $field, $layout, $i)
+{
     
     // Remove thumbnail
     $title = preg_replace('#<div class="acfe-flexible-layout-thumbnail(.*?)</div>#', '', $title);
     
     // Get Layout Title
     $acfe_flexible_layout_title = get_sub_field('acfe_flexible_layout_title');
-    if(!empty($acfe_flexible_layout_title))
+    if (!empty($acfe_flexible_layout_title)) {
         $title = esc_attr(wp_unslash($acfe_flexible_layout_title));
+    }
     
     // Return
     return '<span class="acfe-layout-title acf-js-tooltip" title="' . __('Layout', 'acfe') . ': ' . esc_attr(strip_tags($layout['label'])) . '"><span class="acfe-layout-title-text">' . $title . '</span></span>';
-    
 }
 
 add_action('acf/render_field/type=flexible_content', 'acfe_flexible_render_field');
-function acfe_flexible_render_field($field){
-    
-    if(!isset($field['acfe_flexible_layouts_templates']) || empty($field['acfe_flexible_layouts_templates']) || !isset($field['acfe_flexible_layouts_previews']) || empty($field['acfe_flexible_layouts_previews']) || empty($field['layouts']))
+function acfe_flexible_render_field($field)
+{
+    if (!isset($field['acfe_flexible_layouts_templates']) || empty($field['acfe_flexible_layouts_templates']) || !isset($field['acfe_flexible_layouts_previews']) || empty($field['acfe_flexible_layouts_previews']) || empty($field['layouts'])) {
         return;
+    }
     
     // Vars
     $is_preview = true;
@@ -711,17 +680,16 @@ function acfe_flexible_render_field($field){
     do_action('acfe/flexible/enqueue/key=' . $field['key'], $field, $is_preview);
     
     // Layouts Previews
-    foreach($field['layouts'] as $layout_key => $layout){
+    foreach ($field['layouts'] as $layout_key => $layout) {
         
         // Render: Enqueue
         acfe_flexible_render_layout_enqueue($layout, $field);
-        
     }
-    
 }
 
 add_action('wp_ajax_acfe/flexible/layout_preview', 'acfe_flexible_layout_preview');
-function acfe_flexible_layout_preview(){
+function acfe_flexible_layout_preview()
+{
     
     // Options
     $options = acf_parse_args($_POST, array(
@@ -735,16 +703,18 @@ function acfe_flexible_layout_preview(){
     
     // Load field
     $field = acf_get_field($options['field_key']);
-    if(!$field)
+    if (!$field) {
         die;
+    }
     
     // Get Flexible
     $flexible = acf_get_field_type('flexible_content');
     
     // Vars
     $layout = $flexible->get_layout($options['layout'], $field);
-    if(!$layout)
+    if (!$layout) {
         die;
+    }
     
     // Flexible Thumbnails
     $layout['acfe_flexible_thumbnail'] = apply_filters('acfe/flexible/thumbnail/name=' . $field['_name'], $layout['acfe_flexible_thumbnail'], $field, $layout);
@@ -762,112 +732,107 @@ function acfe_flexible_layout_preview(){
     
     acf_add_local_field($get_field_object);
     
-    add_filter('acf/load_value/key=' . $preview_key, function($value, $post_id, $field) use($options){
-        
+    add_filter('acf/load_value/key=' . $preview_key, function ($value, $post_id, $field) use ($options) {
         $value = array();
         $value[0] = wp_unslash($options['value']);
         
         return $value;
-        
     }, 10, 3);
     
-    if(have_rows($preview_key)):
-        while(have_rows($preview_key)): the_row();
+    if (have_rows($preview_key)):
+        while (have_rows($preview_key)): the_row();
             
-            // Flexible Preview
-            do_action('acfe/flexible/preview/name=' . $field['_name'], $field, $layout);
-            do_action('acfe/flexible/preview/key=' . $field['key'], $field, $layout);
+    // Flexible Preview
+    do_action('acfe/flexible/preview/name=' . $field['_name'], $field, $layout);
+    do_action('acfe/flexible/preview/key=' . $field['key'], $field, $layout);
             
-            // Flexible Layout Preview
-            do_action('acfe/flexible/layout/preview/layout=' . $layout['name'], $field, $layout);
-            do_action('acfe/flexible/layout/preview/name=' . $field['_name'] . '&layout=' . $layout['name'], $field, $layout);
-            do_action('acfe/flexible/layout/preview/key=' . $field['key'] . '&layout=' . $layout['name'], $field, $layout);
+    // Flexible Layout Preview
+    do_action('acfe/flexible/layout/preview/layout=' . $layout['name'], $field, $layout);
+    do_action('acfe/flexible/layout/preview/name=' . $field['_name'] . '&layout=' . $layout['name'], $field, $layout);
+    do_action('acfe/flexible/layout/preview/key=' . $field['key'] . '&layout=' . $layout['name'], $field, $layout);
             
-            // ACFE: All Flexible Preview
-            do_action('acfe/flexible/preview', $field, $layout);
+    // ACFE: All Flexible Preview
+    do_action('acfe/flexible/preview', $field, $layout);
             
-        endwhile;
+    endwhile;
     endif;
     
     die;
-    
 }
 
 add_action('acfe/flexible/preview', 'acfe_flexible_layout_preview_render', 99, 2);
-function acfe_flexible_layout_preview_render($field, $layout){
-    
+function acfe_flexible_layout_preview_render($field, $layout)
+{
     global $is_preview;
     
     $is_preview = true;
     
     acfe_flexible_render_layout_template($layout, $field);
-    
 }
 
 add_filter('acfe/flexible/render/template', 'acfe_flexible_layout_render_template_setting', 0, 4);
-function acfe_flexible_layout_render_template_setting($return, $field, $layout, $is_preview){
-    
-    if(isset($layout['acfe_flexible_render_template']) && !empty($layout['acfe_flexible_render_template']))
+function acfe_flexible_layout_render_template_setting($return, $field, $layout, $is_preview)
+{
+    if (isset($layout['acfe_flexible_render_template']) && !empty($layout['acfe_flexible_render_template'])) {
         $return = ACFE_THEME_PATH . '/' . $layout['acfe_flexible_render_template'];
+    }
     
     return $return;
-    
 }
 
 add_filter('acfe/flexible/render/style', 'acfe_flexible_layout_render_style_setting', 0, 4);
-function acfe_flexible_layout_render_style_setting($return, $field, $layout, $is_preview){
-    
-    if(isset($layout['acfe_flexible_render_style']) && !empty($layout['acfe_flexible_render_style']))
+function acfe_flexible_layout_render_style_setting($return, $field, $layout, $is_preview)
+{
+    if (isset($layout['acfe_flexible_render_style']) && !empty($layout['acfe_flexible_render_style'])) {
         $return = ACFE_THEME_URL . '/' . $layout['acfe_flexible_render_style'];
+    }
     
     return $return;
-    
 }
 
 add_filter('acfe/flexible/render/script', 'acfe_flexible_layout_render_script_setting', 0, 4);
-function acfe_flexible_layout_render_script_setting($return, $field, $layout, $is_preview){
-    
-    if(isset($layout['acfe_flexible_render_script']) && !empty($layout['acfe_flexible_render_script']))
+function acfe_flexible_layout_render_script_setting($return, $field, $layout, $is_preview)
+{
+    if (isset($layout['acfe_flexible_render_script']) && !empty($layout['acfe_flexible_render_script'])) {
         $return = ACFE_THEME_URL . '/' . $layout['acfe_flexible_render_script'];
+    }
     
     return $return;
-    
 }
 
 add_filter('acf/load_field/type=flexible_content', 'acfe_flexible_layout_title_subfield');
-function acfe_flexible_layout_title_subfield($field){
-    
+function acfe_flexible_layout_title_subfield($field)
+{
     global $typenow;
     
-    if(acf_is_screen(array('edit-acf-field-group', 'acf-field-group')) || (isset($typenow) && $typenow === 'acf-field-group'))
+    if (acf_is_screen(array('edit-acf-field-group', 'acf-field-group')) || (isset($typenow) && $typenow === 'acf-field-group')) {
         return $field;
+    }
     
-    if(!isset($field['layouts']) || empty($field['layouts']))
+    if (!isset($field['layouts']) || empty($field['layouts'])) {
         return $field;
+    }
     
-    foreach($field['layouts'] as $layout_key => &$layout){
-        
+    foreach ($field['layouts'] as $layout_key => &$layout) {
         $layout['sub_fields'][] = array(
             'ID'            => false,
             'label'         => false,
-			'key'           => 'field_acfe_flexible_layout_title',
-			'name'          => 'acfe_flexible_layout_title',
-			'_name'         => 'acfe_flexible_layout_title',
-			'type'          => 'text',
-			'required'      => 0,
-			'maxlength'     => null,
-			'parent'        => false,
-			'default_value' => $layout['label'],
-			'placeholder'   => $layout['label'],
+            'key'           => 'field_acfe_flexible_layout_title',
+            'name'          => 'acfe_flexible_layout_title',
+            '_name'         => 'acfe_flexible_layout_title',
+            'type'          => 'text',
+            'required'      => 0,
+            'maxlength'     => null,
+            'parent'        => false,
+            'default_value' => $layout['label'],
+            'placeholder'   => $layout['label'],
             'wrapper'       => array(
                 'id' => '',
                 'class' => '',
                 'width' => '',
             )
-		);
-        
+        );
     }
     
     return $field;
-    
 }
