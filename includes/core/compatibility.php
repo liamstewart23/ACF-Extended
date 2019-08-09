@@ -10,12 +10,10 @@ if(!defined('ABSPATH'))
  */
 add_filter('pto/posts_orderby/ignore', 'acfe_compatibility_pto_acf_field_group', 10, 3);
 function acfe_compatibility_pto_acf_field_group($ignore, $orderby, $query){
-    
-    if(is_admin() && $query->is_main_query() && $query->get('post_type') == 'acf-field-group')
+    if(is_admin() && $query->is_main_query() && $query->get('post_type') === 'acf-field-group')
         $ignore = true;
 
     return $ignore;
-    
 }
 
 /**
@@ -25,9 +23,7 @@ function acfe_compatibility_pto_acf_field_group($ignore, $orderby, $query){
  */
 add_action('admin_menu', 'acfe_compatibility_cotto_submenu', 999);
 function acfe_compatibility_cotto_submenu(){
-    
 	remove_submenu_page('edit.php?post_type=acf-field-group', 'to-interface-acf-field-group');
-    
 }
 
 /**
@@ -37,9 +33,7 @@ function acfe_compatibility_cotto_submenu(){
  */
 add_filter('rank_math/metabox/priority', 'acfe_compatibility_rankmath_metaboxes_priority');
 function acfe_compatibility_rankmath_metaboxes_priority(){
-    
     return 'default';
-    
 }
 
 /**
@@ -49,7 +43,5 @@ function acfe_compatibility_rankmath_metaboxes_priority(){
  */
 add_filter('wpseo_metabox_prio', 'acfe_compatibility_yoast_metaboxes_priority');
 function acfe_compatibility_yoast_metaboxes_priority(){
-    
     return 'default';
-    
 }
